@@ -1,32 +1,82 @@
-# tea_drinking_system
-此專案唯有關於模擬實體茶飲系統的流程的專案，透過不同物件與簡單介面繪製而成，其分為飲品、訂單、員工、介面等四大模組
+# 🧋 tea_drinking_system
 
-### 飲品
-Drink為記錄飲品的物件，當有需記錄飲品時會以association的方式新增作為變數，如Menu、Order內就使用到
-Ingredient也是相同的概念只是存入的是Inventory, Formula
+本專案為模擬實體茶飲店運作流程的 Java 系統，透過物件導向設計與簡易 Swing 介面實現。主要分為四大模組：
 
-### order
-order又分為一般Order與deliveryOrder
-- Order為訂單的物件，填寫著下單人與各項飲品資訊使用Drink物件記錄相關飲品與OrderItem整合成數量、Drink、總計的封包
-- deliveryOrder繼承Order，除了有Order的功能外因為送餐需要地址所以有增加地址與deliveryID
+- 飲品管理（Drink）
+- 訂單管理（Order）
+- 員工管理（Employee）
+- 使用者介面（UI）
 
-### employee
-分為Cashier, Maker, Delivery, Employer 這幾個均繼承Employee
-- Cashier：又分為兩種
-  - Inventory：查看庫存兼下單(通過該飲品的Formula查找需要的材料數量再進入Inventory類別查找是否足夠)，當庫存不足時會自動通知Employer訂購，預設缺貨原料項目的20份，會寫入佇列中確認是誰接的單
-  - Ready：將完成訂單訂單叫號，或放入外送佇列
-- Maker：製作飲品
-- Delivery：外送
-- ----------以上均有執行序搶單機制，確保每位員工都有上工，有使用執行序進行互斥存取
-  
-- Employer：只有Employer可以雇用員工，更改菜單，訂購原物料
+---
 
-### 介面設計分為3個部分
-- 顧客點餐
-  - 開始點餐：會藉由簡易的介面下單，再通過上述物件進入點餐流程
-  - 查看菜單：通過Menu 物件印出菜單內容
-- 店長管理
-  - 菜單管理：透過Employer物件新增、編輯、刪除不同飲品，新增時會一併新增該製作原料配方
-  - 員工管理：雇用、裁員、列出員工
-- 查看日誌
-  - 分成"Customer", "Maker", "Cashier", "Employer", "Delivery", "Other"當不同物件的角色做事時則可以將其logger對應寫入該紀錄格中
+## 🍹 飲品模組（Drink Module）
+
+- `Drink`：用於記錄單項飲品的資訊，常與 `Menu` 和 `Order` 組合使用。
+- `Ingredient`：紀錄原物料，與 `Inventory` 與 `Formula` 模組相關聯。
+
+---
+
+## 🧾 訂單模組（Order Module）
+
+- `Order`：一般訂單，紀錄下單者與所選飲品，透過 `OrderItem` 組成（包含數量、飲品、總價）。
+- `DeliveryOrder`：繼承 `Order`，並擴充地址與 `deliveryID` 欄位以支援外送需求。
+
+---
+
+## 👷‍♂️ 員工模組（Employee Module）
+
+所有員工類型皆繼承自 `Employee` 類別，並具備基本身分與排班機制。
+
+### 📌 員工類型
+
+- `Cashier`（收銀員）分為：
+  - **Inventory 任務**：檢查庫存與下單。當原料不足時，自動通知 `Employer` 補貨（預設補貨數量為缺料項目的 20 份），並記錄到任務佇列。
+  - **Ready 任務**：叫號或將完成訂單放入外送佇列。
+
+- `Maker`（製作員）：根據訂單製作飲品。
+
+- `Delivery`（外送員）：負責將飲品外送至顧客指定地址。
+
+⚠️ 上述角色皆透過 **多執行緒搶單機制** 分配任務，並使用同步鎖確保資源安全互斥。
+
+- `Employer`（雇主）：唯一有權限：
+  - 雇用/裁員
+  - 管理菜單
+  - 訂購原物料
+
+---
+
+## 🖥️ 使用者介面模組（UI Module）
+
+簡易 Swing 圖形介面，分為三大區塊：
+
+### 🧋 顧客端
+
+- **開始點餐**：由顧客透過圖形介面進行點餐，送出後進入訂單處理流程。
+- **查看菜單**：顯示 `Menu` 物件中的所有飲品資訊。
+
+### 🧑‍💼 店長端
+
+- **菜單管理**：由 `Employer` 新增、編輯、刪除飲品；新增時可同時建立其 `Formula`。
+- **員工管理**：支援雇用、裁員與顯示現有員工。
+
+### 📜 系統日誌
+
+- 系統動作皆可紀錄於日誌中，並依據角色分為以下分類：
+  - `Customer`
+  - `Maker`
+  - `Cashier`
+  - `Employer`
+  - `Delivery`
+  - `Other`
+
+---
+
+## 🛠 技術細節
+
+- 語言：Java 17+
+- 圖形介面：Java Swing
+- 執行緒處理：Java 多執行緒與同步鎖（`synchronized`, `wait`, `notify` 等）
+- 模組化設計：物件導向程式設計（OOP）
+- 儲存：暫時以記憶體為主（可擴充持久層）
+
